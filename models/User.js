@@ -28,6 +28,15 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
+
+    passkeyId: String,
+    publicKey: String,
+    counter: {
+      type: Number,
+      default: 0
+    },
+
+
     role: {
       type: String,
       enum: ["user", "admin"],

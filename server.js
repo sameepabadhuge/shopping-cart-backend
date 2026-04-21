@@ -31,6 +31,8 @@ app.use(passport.initialize());
 
 app.use("/api/auth", require("./routes/authRoutes"));
 
+app.use("/api/passkey", require("./routes/passkeyRoutes"));
+
 app.listen(process.env.PORT || 5000, () => {
   console.log("Server running...");
 });
