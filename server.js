@@ -8,14 +8,15 @@ connectDB();
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Test Route
+// Routes
+app.use("/api/auth", require("./routes/authRoutes"));
+
 app.get("/", (req, res) => {
-  res.send("Shopping Cart API Running...");
+  res.send("FreshCart API Running...");
 });
 
 const PORT = process.env.PORT || 5000;
