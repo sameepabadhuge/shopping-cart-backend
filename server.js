@@ -33,6 +33,12 @@ app.use("/api/auth", require("./routes/authRoutes"));
 
 app.use("/api/passkey", require("./routes/passkeyRoutes"));
 
+
+app.use("/api/products", require("./routes/productRoutes"));
+
+
+app.use("/api/dashboard", require("./routes/dashboardRoutes"));
+
 app.listen(process.env.PORT || 5000, () => {
   console.log("Server running...");
 });
