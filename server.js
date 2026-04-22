@@ -1,25 +1,44 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const cors = require("cors");
-const connectDB = require("./config/db");
 
 dotenv.config();
+
+const cors = require("cors");
+const session = require("express-session");
+const passport = require("passport");
+
+const connectDB = require("./config/db");
+require("./config/passport");
+
 connectDB();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL,
+  credentials: true
+}));
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Test Route
-app.get("/", (req, res) => {
-  res.send("Shopping Cart API Running...");
-});
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+}));
 
-const PORT = process.env.PORT || 5000;
+app.use(passport.initialize());
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.use("/api/auth", require("./routes/authRoutes"));
+
+app.use("/api/passkey", require("./routes/passkeyRoutes"));
+
+
+app.use("/api/products", require("./routes/productRoutes"));
+
+
+app.use("/api/dashboard", require("./routes/dashboardRoutes"));
+
+app.listen(process.env.PORT || 5000, () => {
+  console.log("Server running...");
 });
