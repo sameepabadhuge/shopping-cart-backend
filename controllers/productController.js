@@ -5,8 +5,16 @@ require("../models/Product");
 // Add Product
 exports.addProduct = async (req, res) => {
   try {
+
     const product =
-      await Product.create(req.body);
+      await Product.create({
+        name: req.body.name,
+        category: req.body.category,
+        price: req.body.price,
+        stock: req.body.stock,
+        description: req.body.description,
+        image: req.file ? req.file.filename : ""
+      });
 
     res.status(201).json(product);
 
@@ -18,11 +26,14 @@ exports.addProduct = async (req, res) => {
 };
 
 
-// Get All Products
+// Get Products
 exports.getProducts = async (req, res) => {
   try {
+
     const products =
-      await Product.find();
+      await Product.find().sort({
+        createdAt: -1
+      });
 
     res.json(products);
 
@@ -37,12 +48,13 @@ exports.getProducts = async (req, res) => {
 // Delete Product
 exports.deleteProduct = async (req, res) => {
   try {
+
     await Product.findByIdAndDelete(
       req.params.id
     );
 
     res.json({
-      message: "Deleted"
+      message: "Deleted Successfully"
     });
 
   } catch (error) {
@@ -56,10 +68,23 @@ exports.deleteProduct = async (req, res) => {
 // Update Product
 exports.updateProduct = async (req, res) => {
   try {
+
+    const updateData = {
+      name: req.body.name,
+      category: req.body.category,
+      price: req.body.price,
+      stock: req.body.stock,
+      description: req.body.description
+    };
+
+    if (req.file) {
+      updateData.image = req.file.filename;
+    }
+
     const product =
       await Product.findByIdAndUpdate(
         req.params.id,
-        req.body,
+        updateData,
         { new: true }
       );
 
