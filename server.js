@@ -9,16 +9,11 @@ dotenv.config();
 const connectDB = require("./config/db");
 require("./config/passport");
 
-// Connect Database
 connectDB();
 
 const app = express();
 
-/* =========================
-   Middleware
-========================= */
-
-// CORS
+/* Middleware */
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
@@ -26,14 +21,11 @@ app.use(
   })
 );
 
-// Body Parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static Upload Folder
 app.use("/uploads", express.static("uploads"));
 
-// Session
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -42,12 +34,9 @@ app.use(
   })
 );
 
-// Passport
 app.use(passport.initialize());
 
-/* =========================
-   Routes
-========================= */
+/* ROUTES */
 
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/passkey", require("./routes/passkeyRoutes"));
@@ -57,17 +46,15 @@ app.use("/api/categories", require("./routes/categoryRoutes"));
 
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 
-/* =========================
-   Test Route
-========================= */
+/* COMMENT THESE NOW */
+//
+// app.use("/api/orders", require("./routes/orderRoutes"));
+// app.use("/api/users", require("./routes/userRoutes"));
+// app.use("/api/cart", require("./routes/cartRoutes"));
 
 app.get("/", (req, res) => {
   res.send("Backend API Running...");
 });
-
-/* =========================
-   Server Start
-========================= */
 
 const PORT = process.env.PORT || 5000;
 
