@@ -1,5 +1,8 @@
-const express = require("express");
-const router = express.Router();
+const express =
+  require("express");
+
+const router =
+  express.Router();
 
 const {
   addToCart,
@@ -7,16 +10,54 @@ const {
   updateQty,
   removeItem,
   clearCart,
-} = require("../controllers/cartController");
+} = require(
+  "../controllers/cartController"
+);
 
-router.post("/add", addToCart);
+const {
+  protect,
+} = require(
+  "../middleware/authMiddleware"
+);
 
-router.get("/:userId", getCart);
+/* =========================
+   CART ROUTES
+========================= */
 
-router.put("/update", updateQty);
+/* Add Item */
+router.post(
+  "/add",
+  protect,
+  addToCart
+);
 
-router.delete("/remove", removeItem);
+/* Get User Cart */
+router.get(
+  "/:userId",
+  protect,
+  getCart
+);
 
-router.delete("/clear", clearCart);
+/* Update Qty */
+router.put(
+  "/update",
+  protect,
+  updateQty
+);
 
-module.exports = router;
+/* Remove Item */
+router.delete(
+  "/remove",
+  protect,
+  removeItem
+);
+
+/* Clear Cart */
+router.delete(
+  "/clear",
+  protect,
+  clearCart
+);
+
+module.exports =
+  router;
