@@ -1,7 +1,6 @@
-const User = require("../models/User");
+const User = require("..//models/User");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/generateToken");
-
 
 // REGISTER
 const registerUser = async (req, res) => {
@@ -11,22 +10,26 @@ const registerUser = async (req, res) => {
     const exists = await User.findOne({ email });
 
     if (exists) {
-      return res.status(400).json({ message: "User already exists" });
+      return res
+        .status(400)
+        .json({ message: "User already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword =
+      await bcrypt.hash(password, 10);
 
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
+      role: "user",
     });
 
     res.status(201).json({
       message: "Registered successfully",
       token: generateToken(user._id),
       user: {
-        id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -34,10 +37,11 @@ const registerUser = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
-
 
 // USER LOGIN
 const loginUser = async (req, res) => {
@@ -55,7 +59,7 @@ const loginUser = async (req, res) => {
         message: "Login success",
         token: generateToken(user._id),
         user: {
-          id: user._id,
+          _id: user._id,
           name: user.name,
           email: user.email,
           role: user.role,
@@ -63,13 +67,16 @@ const loginUser = async (req, res) => {
       });
     }
 
-    res.status(401).json({ message: "Invalid credentials" });
+    res.status(401).json({
+      message: "Invalid credentials",
+    });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
-
 
 // ADMIN LOGIN
 const loginAdmin = async (req, res) => {
@@ -87,7 +94,7 @@ const loginAdmin = async (req, res) => {
         message: "Admin login success",
         token: generateToken(admin._id),
         user: {
-          id: admin._id,
+          _id: admin._id,
           name: admin.name,
           email: admin.email,
           role: admin.role,
@@ -95,13 +102,16 @@ const loginAdmin = async (req, res) => {
       });
     }
 
-    res.status(401).json({ message: "Invalid admin credentials" });
+    res.status(401).json({
+      message: "Invalid admin credentials",
+    });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
-
 
 // PROFILE
 const getProfile = async (req, res) => {
