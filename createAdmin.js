@@ -1,39 +1,55 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-require("dotenv").config();
+// ADMIN LOGIN
+const loginAdmin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-const User = require("./models/User");
+    console.log("LOGIN EMAIL:", email);
+    console.log("LOGIN PASSWORD:", password);
 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(async () => {
-    const hashedPassword =
-      await bcrypt.hash(
-        "admin123",
-        10
-      );
-
-    await User.deleteOne({
-      email:
-        "admin@freshcart.com",
+    const admin = await User.findOne({
+      email: email.trim(),
     });
 
-    await User.create({
-      name: "Admin",
-      email:
-        "admin@freshcart.com",
-      password:
-        hashedPassword,
-      role: "admin",
-    });
+    console.log("FOUND ADMIN:", admin);
 
-    console.log(
-      "Admin Created"
+    if (!admin) {
+      return res.status(401).json({
+        message: "Admin not found",
+      });
+    }
+
+    const match = await bcrypt.compare(
+      password,
+      admin.password
     );
 
-    process.exit();
-  })
-  .catch((err) => {
-    console.log(err);
-    process.exit();
-  });
+    console.log("PASSWORD MATCH:", match);
+    console.log("ROLE:", admin.role);
+
+    if (
+      match &&
+      admin.role === "admin"
+    ) {
+      return res.json({
+        message: "Admin login success",
+        token: generateToken(admin._id),
+        user: {
+          _id: admin._id,
+          name: admin.name,
+          email: admin.email,
+          role: admin.role,
+        },
+      });
+    }
+
+    res.status(401).json({
+      message: "Invalid admin credentials",
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
