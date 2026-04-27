@@ -1,14 +1,34 @@
-// backend/config/passport.js
+const passport =
+  require("passport");
 
-const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const User = require("../models/User");
+const GoogleStrategy =
+  require(
+    "passport-google-oauth20"
+  ).Strategy;
+
+const FacebookStrategy =
+  require(
+    "passport-facebook"
+  ).Strategy;
+
+const User =
+  require("../models/User");
+
+/* ===============================
+   GOOGLE LOGIN
+================================= */
 
 passport.use(
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientID:
+        process.env
+          .GOOGLE_CLIENT_ID,
+
+      clientSecret:
+        process.env
+          .GOOGLE_CLIENT_SECRET,
+
       callbackURL:
         "http://localhost:5000/api/auth/google/callback",
     },
@@ -21,48 +41,180 @@ passport.use(
     ) => {
       try {
         const email =
-          profile.emails[0].value;
+          profile.emails[0]
+            .value;
 
-        let user = await User.findOne({
-          email,
-        });
+        let user =
+          await User.findOne(
+            {
+              email,
+            }
+          );
 
-        // If user doesn't exist, create new user
         if (!user) {
-          user = await User.create({
-            name: profile.displayName,
-            email: email,
-            googleId: profile.id,
-            role: "user",
-          });
+          user =
+            await User.create(
+              {
+                name:
+                  profile.displayName,
+
+                email:
+                  email,
+
+                googleId:
+                  profile.id,
+
+                role:
+                  "user",
+              }
+            );
         }
 
-        return done(null, user);
-
+        return done(
+          null,
+          user
+        );
       } catch (error) {
-        return done(error, null);
+        return done(
+          error,
+          null
+        );
       }
     }
   )
 );
 
-// Session Support
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
+/* ===============================
+   FACEBOOK LOGIN
+================================= */
+
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID:
+        process.env
+          .FACEBOOK_APP_ID,
+
+      clientSecret:
+        process.env
+          .FACEBOOK_APP_SECRET,
+
+      callbackURL:
+        "http://localhost:5000/api/auth/facebook/callback",
+
+      profileFields: [
+        "id",
+        "displayName",
+      ],
+    },
+
+    async (
+      accessToken,
+      refreshToken,
+      profile,
+      done
+    ) => {
+      try {
+        const email =
+          `${profile.id}@facebook.com`;
+
+        let user =
+          await User.findOne(
+            {
+              $or: [
+                {
+                  facebookId:
+                    profile.id,
+                },
+                {
+                  email:
+                    email,
+                },
+              ],
+            }
+          );
+
+        if (!user) {
+          user =
+            await User.create(
+              {
+                name:
+                  profile.displayName,
+
+                email:
+                  email,
+
+                facebookId:
+                  profile.id,
+
+                role:
+                  "user",
+              }
+            );
+        } else {
+          if (
+            !user.facebookId
+          ) {
+            user.facebookId =
+              profile.id;
+
+            await user.save();
+          }
+        }
+
+        return done(
+          null,
+          user
+        );
+      } catch (error) {
+        return done(
+          error,
+          null
+        );
+      }
+    }
+  )
+);
+
+/* ===============================
+   SESSION SUPPORT
+================================= */
+
+passport.serializeUser(
+  (
+    user,
+    done
+  ) => {
+    done(
+      null,
+      user.id
+    );
+  }
+);
 
 passport.deserializeUser(
-  async (id, done) => {
+  async (
+    id,
+    done
+  ) => {
     try {
       const user =
-        await User.findById(id);
+        await User.findById(
+          id
+        );
 
-      done(null, user);
-
+      done(
+        null,
+        user
+      );
     } catch (error) {
-      done(error, null);
+      done(
+        error,
+        null
+      );
     }
   }
 );
 
-module.exports = passport;
+module.exports =
+  passport;
