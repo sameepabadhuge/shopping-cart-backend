@@ -1,5 +1,3 @@
-
-
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
@@ -14,9 +12,9 @@ const {
 
 const { protect } = require("../middleware/authMiddleware");
 
-
-// Normal Auth Routes
-
+/* ===============================
+   NORMAL AUTH ROUTES
+================================= */
 
 // Register
 router.post("/register", registerUser);
@@ -30,9 +28,9 @@ router.post("/admin-login", loginAdmin);
 // User Profile
 router.get("/profile", protect, getProfile);
 
-
-// Google Login Routes
-
+/* ===============================
+   GOOGLE LOGIN ROUTES
+================================= */
 
 // Start Google Login
 router.get(
@@ -47,23 +45,28 @@ router.get(
   "/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "http://localhost:5173/login",
+    failureRedirect: `${process.env.CLIENT_URL}/login`,
   }),
   (req, res) => {
-    const token = jwt.sign(
-      {
-        id: req.user._id,
-        email: req.user.email,
-        role: req.user.role,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    try {
+      const token = jwt.sign(
+        {
+          id: req.user._id,
+          email: req.user.email,
+          role: req.user.role,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
 
-    // Redirect back to Login page with token
-    res.redirect(
-      `http://localhost:5173/login?token=${token}`
-    );
+      res.redirect(
+        `${process.env.CLIENT_URL}/login?token=${token}`
+      );
+    } catch (error) {
+      res.redirect(
+        `${process.env.CLIENT_URL}/login`
+      );
+    }
   }
 );
 
