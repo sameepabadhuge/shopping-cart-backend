@@ -6,6 +6,7 @@ dotenv.config();
 const cors = require("cors");
 const session = require("express-session");
 const passport = require("passport");
+const path = require("path");
 
 const connectDB = require("./config/db");
 require("./config/passport");
@@ -14,31 +15,83 @@ connectDB();
 
 const app = express();
 
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true
-}));
+/* ===============================
+   CORS
+================================= */
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  })
+);
 
+/* ===============================
+   BODY PARSER
+================================= */
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false
-}));
+/* ===============================
+   SESSION
+================================= */
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
+/* ===============================
+   PASSPORT
+================================= */
 app.use(passport.initialize());
 
-app.use("/api/auth", require("./routes/authRoutes"));
+/* ===============================
+   STATIC UPLOADS
+================================= */
+app.use(
+  "/uploads",
+  express.static(
+    path.join(__dirname, "uploads")
+  )
+);
 
-app.use("/api/passkey", require("./routes/passkeyRoutes"));
+/* ===============================
+   ROUTES
+================================= */
+app.get("/", (req, res) => {
+  res.send("FreshCart Backend Running...");
+});
 
+app.use(
+  "/api/auth",
+  require("./routes/authRoutes")
+);
 
-app.use("/api/products", require("./routes/productRoutes"));
+app.use(
+  "/api/passkey",
+  require("./routes/passkeyRoutes")
+);
 
+app.use(
+  "/api/products",
+  require("./routes/productRoutes")
+);
 
-app.use("/api/dashboard", require("./routes/dashboardRoutes"));
+app.use(
+  "/api/dashboard",
+  require("./routes/dashboardRoutes")
+);
 
-app.listen(process.env.PORT || 5000, () => {
-  console.log("Server running...");
+/* ===============================
+   START SERVER
+================================= */
+const PORT =
+  process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(
+    `Server running on port ${PORT}`
+  );
 });

@@ -1,25 +1,40 @@
 const Product =
-require("../models/Product");
+  require("../models/Product");
 
-
-// Add Product
-exports.addProduct = async (req, res) => {
+/* Add Product */
+exports.addProduct =
+async (req, res) => {
   try {
     const product =
-      await Product.create(req.body);
+      await Product.create({
+        name: req.body.name,
+        category:
+          req.body.category,
+        price: req.body.price,
+        stock: req.body.stock,
+        description:
+          req.body.description,
+        image:
+          req.file
+            ? req.file.filename
+            : "",
+      });
 
-    res.status(201).json(product);
+    res.status(201).json(
+      product
+    );
 
   } catch (error) {
     res.status(500).json({
-      message: error.message
+      message:
+        error.message,
     });
   }
 };
 
-
-// Get All Products
-exports.getProducts = async (req, res) => {
+/* Get Products */
+exports.getProducts =
+async (req, res) => {
   try {
     const products =
       await Product.find();
@@ -28,38 +43,50 @@ exports.getProducts = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({
-      message: error.message
+      message:
+        error.message,
     });
   }
 };
 
-
-// Delete Product
-exports.deleteProduct = async (req, res) => {
+/* Delete */
+exports.deleteProduct =
+async (req, res) => {
   try {
     await Product.findByIdAndDelete(
       req.params.id
     );
 
     res.json({
-      message: "Deleted"
+      message:
+        "Deleted",
     });
 
   } catch (error) {
     res.status(500).json({
-      message: error.message
+      message:
+        error.message,
     });
   }
 };
 
-
-// Update Product
-exports.updateProduct = async (req, res) => {
+/* Update */
+exports.updateProduct =
+async (req, res) => {
   try {
+    const updateData = {
+      ...req.body,
+    };
+
+    if (req.file) {
+      updateData.image =
+        req.file.filename;
+    }
+
     const product =
       await Product.findByIdAndUpdate(
         req.params.id,
-        req.body,
+        updateData,
         { new: true }
       );
 
@@ -67,7 +94,8 @@ exports.updateProduct = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({
-      message: error.message
+      message:
+        error.message,
     });
   }
 };
