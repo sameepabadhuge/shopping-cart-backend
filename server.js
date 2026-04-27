@@ -58,12 +58,15 @@ app.use(
 );
 
 /* ===============================
-   ROUTES
+   HOME
 ================================= */
 app.get("/", (req, res) => {
   res.send("FreshCart Backend Running...");
 });
 
+/* ===============================
+   API ROUTES
+================================= */
 app.use(
   "/api/auth",
   require("./routes/authRoutes")
@@ -77,6 +80,11 @@ app.use(
 app.use(
   "/api/products",
   require("./routes/productRoutes")
+);
+
+app.use(
+  "/api/categories",
+  require("./routes/categoryRoutes")
 );
 
 app.use(
