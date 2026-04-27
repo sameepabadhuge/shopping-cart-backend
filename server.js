@@ -1,174 +1,97 @@
-const express =
-  require("express");
-
-const dotenv =
-  require("dotenv");
-
-const cors =
-  require("cors");
-
-const session =
-  require(
-    "express-session"
-  );
-
-const passport =
-  require("passport");
+const express = require("express");
+const dotenv = require("dotenv");
 
 dotenv.config();
 
-const connectDB =
-  require("./config/db");
+const cors = require("cors");
+const session = require("express-session");
+const passport = require("passport");
+const path = require("path");
 
-require(
-  "./config/passport"
-);
+const connectDB = require("./config/db");
+require("./config/passport");
 
 connectDB();
 
-const app =
-  express();
+const app = express();
 
-/* =========================
-   MIDDLEWARE
-========================= */
-
+/* ===============================
+   CORS
+================================= */
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://shopping-cart-frontend-psi.vercel.app"
-      ],     
-       credentials: true,
+    origin: process.env.CLIENT_URL,
+    credentials: true,
   })
 );
 
-app.use(
-  express.json()
-);
+/* ===============================
+   BODY PARSER
+================================= */
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use(
-  express.urlencoded({
-    extended: true,
-  })
-);
-
-app.use(
-  "/uploads",
-  express.static(
-    "uploads"
-  )
-);
-
+/* ===============================
+   SESSION
+================================= */
 app.use(
   session({
-    secret:
-      process.env
-        .SESSION_SECRET,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
   })
 );
 
+/* ===============================
+   PASSPORT
+================================= */
+app.use(passport.initialize());
+
+/* ===============================
+   STATIC UPLOADS
+================================= */
 app.use(
-  passport.initialize()
+  "/uploads",
+  express.static(
+    path.join(__dirname, "uploads")
+  )
 );
 
-app.use(
-  passport.session()
-);
-
-/* =========================
+/* ===============================
    ROUTES
-========================= */
+================================= */
+app.get("/", (req, res) => {
+  res.send("FreshCart Backend Running...");
+});
 
-/* Auth */
 app.use(
   "/api/auth",
-  require(
-    "./routes/authRoutes"
-  )
+  require("./routes/authRoutes")
 );
 
-/* NEW USER SETTINGS + SECURITY */
-app.use(
-  "/api/user",
-  require(
-    "./routes/userRoutes"
-  )
-);
-
-/* Passkey */
 app.use(
   "/api/passkey",
-  require(
-    "./routes/passkeyRoutes"
-  )
+  require("./routes/passkeyRoutes")
 );
 
-/* Products */
 app.use(
   "/api/products",
-  require(
-    "./routes/productRoutes"
-  )
+  require("./routes/productRoutes")
 );
 
-/* Categories */
-app.use(
-  "/api/categories",
-  require(
-    "./routes/categoryRoutes"
-  )
-);
-
-/* Dashboard */
 app.use(
   "/api/dashboard",
-  require(
-    "./routes/dashboardRoutes"
-  )
+  require("./routes/dashboardRoutes")
 );
 
-/* Orders */
-app.use(
-  "/api/orders",
-  require(
-    "./routes/orderRoutes"
-  )
-);
-
-/* Cart */
-app.use(
-  "/api/cart",
-  require(
-    "./routes/cartRoutes"
-  )
-);
-
-/* Root */
-app.get(
-  "/",
-  (req, res) => {
-    res.send(
-      "FreshCart Backend Running..."
-    );
-  }
-);
-
-/* =========================
+/* ===============================
    START SERVER
-========================= */
-
+================================= */
 const PORT =
-  process.env.PORT ||
-  5000;
+  process.env.PORT || 5000;
 
-app.listen(
-  PORT,
-  () => {
-    console.log(
-      `Server running on port ${PORT}`
-    );
-  }
-);
+app.listen(PORT, () => {
+  console.log(
+    `Server running on port ${PORT}`
+  );
+});

@@ -5,39 +5,45 @@ const multer = require("multer");
 const {
   addProduct,
   getProducts,
-  getSingleProduct,
   deleteProduct,
-  updateProduct,
+  updateProduct
 } = require("../controllers/productController");
 
-// Multer Storage
+/* Upload Config */
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
   },
 
   filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
+    cb(
+      null,
+      Date.now() +
+      "-" +
+      file.originalname
+    );
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+});
 
-// Routes
+/* Routes */
+router.post(
+  "/",
+  upload.single("image"),
+  addProduct
+);
 
-// Add Product
-router.post("/", upload.single("image"), addProduct);
-
-// Get All Products
 router.get("/", getProducts);
 
-// Get Single Product
-router.get("/:id", getSingleProduct);
-
-// Delete Product
 router.delete("/:id", deleteProduct);
 
-// Update Product
-router.put("/:id", upload.single("image"), updateProduct);
+router.put(
+  "/:id",
+  upload.single("image"),
+  updateProduct
+);
 
 module.exports = router;
