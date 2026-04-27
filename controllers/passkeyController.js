@@ -5,101 +5,143 @@ const {
   verifyAuthenticationResponse,
 } = require("@simplewebauthn/server");
 
-const User = require("../models/User");
-const generateToken = require("../utils/generateToken");
+const User =
+  require("../models/User");
+
+const generateToken =
+  require(
+    "../utils/generateToken"
+  );
 
 /* ==================================
    CONFIG
 ================================== */
-const rpName = "FreshCart";
-const rpID = "localhost";
-const origin = "http://localhost:5173";
+const rpName =
+  "FreshCart";
+
+/*
+For Render + Vercel
+Use backend domain only
+(no https:// here)
+*/
+const rpID =
+  "shopping-cart-backend-27dv.onrender.com";
+
+/*
+Frontend origin
+*/
+const origin =
+  "https://shopping-cart-frontend-psi.vercel.app";
 
 /* ==================================
    TEMP CHALLENGE STORAGE
 ================================== */
-let currentLoginChallenge = null;
+let currentLoginChallenge =
+  null;
 
 /* ==================================
    REGISTER OPTIONS
 ================================== */
-const registerOptions = async (req, res) => {
-  try {
-    const { email } = req.body;
+const registerOptions =
+  async (req, res) => {
+    try {
+      const { email } =
+        req.body;
 
-    const user = await User.findOne({
-      email,
-    });
+      const cleanEmail =
+        email
+          .toLowerCase()
+          .trim();
 
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
+      const user =
+        await User.findOne({
+          email:
+            cleanEmail,
+        });
+
+      if (!user) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "User not found",
+          });
+      }
+
+      const options =
+        await generateRegistrationOptions(
+          {
+            rpName,
+            rpID,
+
+            userID:
+              Buffer.from(
+                user._id.toString(),
+                "utf8"
+              ),
+
+            userName:
+              user.email,
+
+            userDisplayName:
+              user.name,
+
+            timeout:
+              60000,
+
+            attestationType:
+              "none",
+
+            authenticatorSelection:
+              {
+                residentKey:
+                  "preferred",
+
+                userVerification:
+                  "preferred",
+              },
+
+            excludeCredentials:
+              user.passkey
+                ?.credentialID
+                ? [
+                    {
+                      id: Buffer.from(
+                        user
+                          .passkey
+                          .credentialID,
+                        "base64url"
+                      ),
+                      type:
+                        "public-key",
+                    },
+                  ]
+                : [],
+          }
+        );
+
+      user.currentChallenge =
+        options.challenge;
+
+      await user.save();
+
+      return res.json(
+        options
+      );
+    } catch (error) {
+      console.log(
+        "REGISTER OPTIONS ERROR:"
+      );
+      console.log(error);
+
+      return res
+        .status(500)
+        .json({
+          message:
+            error.message,
+        });
     }
-
-    const options =
-      await generateRegistrationOptions({
-        rpName,
-        rpID,
-
-        userID: Buffer.from(
-          user._id.toString(),
-          "utf8"
-        ),
-
-        userName: user.email,
-
-        userDisplayName:
-          user.name,
-
-        timeout: 60000,
-
-        attestationType:
-          "none",
-
-        authenticatorSelection: {
-          residentKey:
-            "preferred",
-
-          userVerification:
-            "preferred",
-        },
-
-        excludeCredentials:
-          user.passkey
-            ?.credentialID
-            ? [
-                {
-                  id: Buffer.from(
-                    user.passkey
-                      .credentialID,
-                    "base64url"
-                  ),
-                  type:
-                    "public-key",
-                },
-              ]
-            : [],
-      });
-
-    user.currentChallenge =
-      options.challenge;
-
-    await user.save();
-
-    return res.json(options);
-  } catch (error) {
-    console.log(
-      "REGISTER OPTIONS ERROR:"
-    );
-    console.log(error);
-
-    return res.status(500).json({
-      message:
-        error.message,
-    });
-  }
-};
+  };
 
 /* ==================================
    REGISTER VERIFY
@@ -112,16 +154,24 @@ const registerVerify =
         credential,
       } = req.body;
 
+      const cleanEmail =
+        email
+          .toLowerCase()
+          .trim();
+
       const user =
         await User.findOne({
-          email,
+          email:
+            cleanEmail,
         });
 
       if (!user) {
-        return res.status(404).json({
-          message:
-            "User not found",
-        });
+        return res
+          .status(404)
+          .json({
+            message:
+              "User not found",
+          });
       }
 
       const verification =
@@ -144,10 +194,12 @@ const registerVerify =
       if (
         !verification?.verified
       ) {
-        return res.status(400).json({
-          message:
-            "Passkey registration failed",
-        });
+        return res
+          .status(400)
+          .json({
+            message:
+              "Passkey registration failed",
+          });
       }
 
       const reg =
@@ -159,20 +211,25 @@ const registerVerify =
 
         publicKey:
           Buffer.from(
-            reg.credential
+            reg
+              .credential
               .publicKey
           ).toString(
             "base64url"
           ),
 
         counter:
-          reg.credential
-            .counter || 0,
+          reg
+            .credential
+            .counter ||
+          0,
       };
 
       user.counter =
-        reg.credential
-          .counter || 0;
+        reg
+          .credential
+          .counter ||
+        0;
 
       user.currentChallenge =
         null;
@@ -189,10 +246,12 @@ const registerVerify =
       );
       console.log(error);
 
-      return res.status(500).json({
-        message:
-          error.message,
-      });
+      return res
+        .status(500)
+        .json({
+          message:
+            error.message,
+        });
     }
   };
 
@@ -206,7 +265,8 @@ const loginOptions =
         await generateAuthenticationOptions(
           {
             rpID,
-            timeout: 60000,
+            timeout:
+              60000,
             userVerification:
               "preferred",
           }
@@ -224,22 +284,24 @@ const loginOptions =
       );
       console.log(error);
 
-      return res.status(500).json({
-        message:
-          error.message,
-      });
+      return res
+        .status(500)
+        .json({
+          message:
+            error.message,
+        });
     }
   };
 
 /* ==================================
    LOGIN VERIFY
-   FIXED ONLY THIS SECTION
 ================================== */
 const loginVerify =
   async (req, res) => {
     try {
-      const { credential } =
-        req.body;
+      const {
+        credential,
+      } = req.body;
 
       const user =
         await User.findOne({
@@ -248,10 +310,12 @@ const loginVerify =
         });
 
       if (!user) {
-        return res.status(404).json({
-          message:
-            "User not found",
-        });
+        return res
+          .status(404)
+          .json({
+            message:
+              "User not found",
+          });
       }
 
       if (
@@ -261,35 +325,42 @@ const loginVerify =
         !user.passkey
           .publicKey
       ) {
-        return res.status(400).json({
-          message:
-            "No valid passkey found. Please register again.",
-        });
+        return res
+          .status(400)
+          .json({
+            message:
+              "No valid passkey found. Please register again.",
+          });
       }
 
-      const storedCredential = {
-        id: Buffer.from(
-          user.passkey
-            .credentialID,
-          "base64url"
-        ),
-
-        publicKey:
-          Buffer.from(
+      const storedCredential =
+        {
+          id: Buffer.from(
             user.passkey
-              .publicKey,
+              .credentialID,
             "base64url"
           ),
 
-        counter: Number(
-          user.passkey
-            ?.counter ?? 0
-        ),
+          publicKey:
+            Buffer.from(
+              user.passkey
+                .publicKey,
+              "base64url"
+            ),
 
-        transports: [
-          "internal",
-        ],
-      };
+          counter:
+            Number(
+              user
+                .passkey
+                ?.counter ??
+                0
+            ),
+
+          transports:
+            [
+              "internal",
+            ],
+        };
 
       const verification =
         await verifyAuthenticationResponse(
@@ -314,16 +385,19 @@ const loginVerify =
       if (
         !verification?.verified
       ) {
-        return res.status(401).json({
-          message:
-            "Passkey login failed",
-        });
+        return res
+          .status(401)
+          .json({
+            message:
+              "Passkey login failed",
+          });
       }
 
       const newCounter =
         verification
           ?.authenticationInfo
-          ?.newCounter ?? 0;
+          ?.newCounter ??
+        0;
 
       user.passkey.counter =
         newCounter;
@@ -356,14 +430,13 @@ const loginVerify =
         "LOGIN VERIFY ERROR:"
       );
       console.log(error);
-      console.log(
-        error.stack
-      );
 
-      return res.status(500).json({
-        message:
-          error.message,
-      });
+      return res
+        .status(500)
+        .json({
+          message:
+            error.message,
+        });
     }
   };
 
@@ -379,10 +452,12 @@ const removePasskey =
         );
 
       if (!user) {
-        return res.status(404).json({
-          message:
-            "User not found",
-        });
+        return res
+          .status(404)
+          .json({
+            message:
+              "User not found",
+          });
       }
 
       user.passkey = {
@@ -409,10 +484,12 @@ const removePasskey =
       );
       console.log(error);
 
-      return res.status(500).json({
-        message:
-          error.message,
-      });
+      return res
+        .status(500)
+        .json({
+          message:
+            error.message,
+        });
     }
   };
 

@@ -19,9 +19,15 @@ const registerUser =
         password,
       } = req.body;
 
+      const cleanEmail =
+        email
+          .toLowerCase()
+          .trim();
+
       const exists =
         await User.findOne({
-          email,
+          email:
+            cleanEmail,
         });
 
       if (exists) {
@@ -41,11 +47,14 @@ const registerUser =
 
       const user =
         await User.create({
-          name,
-          email,
+          name:
+            name.trim(),
+          email:
+            cleanEmail,
           password:
             hashedPassword,
-          role: "user",
+          role:
+            "user",
         });
 
       res.status(201).json({
@@ -56,8 +65,10 @@ const registerUser =
             user._id
           ),
         user: {
-          _id: user._id,
-          name: user.name,
+          _id:
+            user._id,
+          name:
+            user.name,
           email:
             user.email,
           role:
@@ -83,9 +94,15 @@ const loginUser =
         password,
       } = req.body;
 
+      const cleanEmail =
+        email
+          .toLowerCase()
+          .trim();
+
       const user =
         await User.findOne({
-          email,
+          email:
+            cleanEmail,
         });
 
       if (
@@ -105,7 +122,8 @@ const loginUser =
               user._id
             ),
           user: {
-            _id: user._id,
+            _id:
+              user._id,
             name:
               user.name,
             email:
@@ -139,9 +157,15 @@ const loginWithPasscode =
         passcode,
       } = req.body;
 
+      const cleanEmail =
+        email
+          .toLowerCase()
+          .trim();
+
       const user =
         await User.findOne({
-          email,
+          email:
+            cleanEmail,
         });
 
       if (
@@ -191,7 +215,8 @@ const loginWithPasscode =
             user._id
           ),
         user: {
-          _id: user._id,
+          _id:
+            user._id,
           name:
             user.name,
           email:
@@ -219,9 +244,15 @@ const loginAdmin =
         password,
       } = req.body;
 
+      const cleanEmail =
+        email
+          .toLowerCase()
+          .trim();
+
       const admin =
         await User.findOne({
-          email,
+          email:
+            cleanEmail,
         });
 
       if (
@@ -270,7 +301,9 @@ const loginAdmin =
 ================================== */
 const getProfile =
   async (req, res) => {
-    res.json(req.user);
+    res.json(
+      req.user
+    );
   };
 
 /* ==================================

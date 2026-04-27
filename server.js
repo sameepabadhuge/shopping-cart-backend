@@ -35,9 +35,11 @@ const app =
 
 app.use(
   cors({
-    origin:
-      process.env.CLIENT_URL,
-    credentials: true,
+    origin: [
+      "http://localhost:5173",
+      "https://shopping-cart-frontend-psi.vercel.app"
+      ],     
+       credentials: true,
   })
 );
 
