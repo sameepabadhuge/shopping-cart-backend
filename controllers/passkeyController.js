@@ -25,7 +25,7 @@ Use backend domain only
 (no https:// here)
 */
 const rpID =
-  "shopping-cart-backend-27dv.onrender.com";
+  "shopping-cart-frontend-psi.vercel.app";
 
 /*
 Frontend origin
