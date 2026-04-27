@@ -30,7 +30,7 @@ passport.use(
           .GOOGLE_CLIENT_SECRET,
 
       callbackURL:
-        "http://localhost:5000/api/auth/google/callback",
+        "https://shopping-cart-backend-27dv.onrender.com/api/auth/google/callback"
     },
 
     async (
