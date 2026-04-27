@@ -42,7 +42,7 @@ router.post(
   loginUser
 );
 
-// NEW PASSCODE LOGIN
+// Passcode Login
 router.post(
   "/passcode-login",
   loginWithPasscode
@@ -96,13 +96,67 @@ router.get(
     const token =
       jwt.sign(
         {
-          id: req.user._id,
+          id:
+            req.user._id,
           email:
             req.user.email,
           role:
             req.user.role,
         },
         process.env.JWT_SECRET,
+        {
+          expiresIn:
+            "7d",
+        }
+      );
+
+    res.redirect(
+      `http://localhost:5173/login?token=${token}`
+    );
+  }
+);
+
+/* ==================================
+   FACEBOOK LOGIN ROUTES
+================================== */
+
+// Start Facebook Login
+router.get(
+  "/facebook",
+
+  passport.authenticate("facebook",)
+);
+
+// Facebook Callback
+router.get(
+  "/facebook/callback",
+
+  passport.authenticate(
+    "facebook",
+    {
+      session: false,
+
+      failureRedirect:
+        "http://localhost:5173/login",
+    }
+  ),
+
+  (req, res) => {
+    const token =
+      jwt.sign(
+        {
+          id:
+            req.user._id,
+
+          email:
+            req.user.email,
+
+          role:
+            req.user.role,
+        },
+
+        process.env.JWT_SECRET,
+
         {
           expiresIn:
             "7d",
