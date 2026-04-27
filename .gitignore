@@ -31,8 +31,7 @@ Thumbs.db
 # VS Code
 .vscode/
 
-# Uploaded files (optional if user uploads should not be public)
-uploads/
+
 
 # Temporary files
 .tmp/
