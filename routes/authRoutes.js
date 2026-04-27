@@ -27,34 +27,40 @@ const {
 );
 
 /* ==================================
+   FRONTEND URL
+================================== */
+const CLIENT_URL =
+  "https://shopping-cart-frontend-psi.vercel.app";
+
+/* ==================================
    NORMAL AUTH ROUTES
 ================================== */
 
-// Register
+/* Register */
 router.post(
   "/register",
   registerUser
 );
 
-// User Login
+/* User Login */
 router.post(
   "/login",
   loginUser
 );
 
-// Passcode Login
+/* Passcode Login */
 router.post(
   "/passcode-login",
   loginWithPasscode
 );
 
-// Admin Login
+/* Admin Login */
 router.post(
   "/admin-login",
   loginAdmin
 );
 
-// User Profile
+/* User Profile */
 router.get(
   "/profile",
   protect,
@@ -65,7 +71,7 @@ router.get(
    GOOGLE LOGIN ROUTES
 ================================== */
 
-// Start Google Login
+/* Start Google Login */
 router.get(
   "/google",
   passport.authenticate(
@@ -79,7 +85,7 @@ router.get(
   )
 );
 
-// Google Callback
+/* Google Callback */
 router.get(
   "/google/callback",
 
@@ -87,8 +93,9 @@ router.get(
     "google",
     {
       session: false,
+
       failureRedirect:
-        "http://localhost:5173/login",
+        `${CLIENT_URL}/login`,
     }
   ),
 
@@ -98,12 +105,16 @@ router.get(
         {
           id:
             req.user._id,
+
           email:
             req.user.email,
+
           role:
             req.user.role,
         },
+
         process.env.JWT_SECRET,
+
         {
           expiresIn:
             "7d",
@@ -111,7 +122,7 @@ router.get(
       );
 
     res.redirect(
-      `http://localhost:5173/login?token=${token}`
+      `${CLIENT_URL}/login?token=${token}`
     );
   }
 );
@@ -120,14 +131,21 @@ router.get(
    FACEBOOK LOGIN ROUTES
 ================================== */
 
-// Start Facebook Login
+/* Start Facebook Login */
 router.get(
   "/facebook",
 
-  passport.authenticate("facebook",)
+  passport.authenticate(
+    "facebook",
+    {
+      scope: [
+        "email",
+      ],
+    }
+  )
 );
 
-// Facebook Callback
+/* Facebook Callback */
 router.get(
   "/facebook/callback",
 
@@ -137,7 +155,7 @@ router.get(
       session: false,
 
       failureRedirect:
-        "http://localhost:5173/login",
+        `${CLIENT_URL}/login`,
     }
   ),
 
@@ -164,7 +182,7 @@ router.get(
       );
 
     res.redirect(
-      `http://localhost:5173/login?token=${token}`
+      `${CLIENT_URL}/login?token=${token}`
     );
   }
 );
