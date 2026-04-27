@@ -100,7 +100,7 @@ passport.use(
           .FACEBOOK_APP_SECRET,
 
       callbackURL:
-        "http://localhost:5000/api/auth/facebook/callback",
+        "https://shopping-cart-backend-27dv.onrender.com/api/auth/facebook/callback",
 
       profileFields: [
         "id",
