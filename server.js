@@ -92,6 +92,12 @@ app.use(
   require("./routes/dashboardRoutes")
 );
 
+
+app.use(
+  "/api/cart",
+  require("./routes/cartRoutes")
+);
+
 /* ===============================
    START SERVER
 ================================= */
